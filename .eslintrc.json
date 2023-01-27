@@ -1,0 +1,82 @@
+{
+  "ignorePatterns": [
+    "cypress/integration/1-getting-started/**/*",
+    "cypress/integration/2-advanced-examples/**/*",
+    "**/node_modules/**/*",
+    "**/build/**/*",
+    "webpack.config.*",
+    "**/dist/*"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true,
+    "jest": true
+  },
+  "plugins": [
+    "prettier",
+    "@typescript-eslint",
+    "import",
+    "jsx-a11y"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:import/recommended",
+    "plugin:jsx-a11y/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
+  ],
+  "rules": {
+    "max-len": ["error", { "code": 120 }],
+    "@typescript-eslint/no-empty-function": "off",
+    "@typescript-eslint/ban-ts-comment": "warn",
+    "@typescript-eslint/no-unused-vars": ["warn", { "varsIgnorePattern": "_.*_", "argsIgnorePattern": "_.*_" }],
+    "@typescript-eslint/no-namespace": ["error", {
+      "allowDeclarations": true
+    }],
+    "import/order": [
+      "error", {
+        "groups": ["type", "builtin", "external", "internal", "parent", "sibling", "index"],
+        "newlines-between": "always",
+        "alphabetize": {
+          "order": "asc"
+        }
+      }
+    ],
+
+    // to properly type some solid js related things, the Function type is needed so we are allowing it
+    "@typescript-eslint/ban-types": [
+        "error",
+        {
+          "types": {
+            "Function": false
+          },
+          "extendDefaults": true
+        }
+      ]
+  },
+  "settings": {
+    "import/resolver": {
+      // even though empty, still needed by the import plugin
+      "typescript": {}
+    }
+  },
+  "overrides": [
+    {
+      "files": ["*.cy.ts", "*.cy.tsx", "*.spec.ts", "*.spec.tsx", "*.pw.ts", "*.pw.tsx"],
+      "rules": {
+        // test names can be long so ignoring this rule for test files
+        "max-len": "off",
+
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-unused-vars": "off",
+        "@typescript-eslint/no-empty-interface": "off"
+      }
+    }
+  ]
+}

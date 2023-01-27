@@ -1,0 +1,6 @@
+{
+    "excludeAfterRemap": true,
+    "all": true,
+    "include": ["packages/**/*.ts", "packages/**/*.tsx"],
+    "exclude": ["**/*.spec.js", "**/*.spec.jsx", "**/*.spec.ts", "**/*.spec.tsx", "**/*.stories.tsx"]
+}

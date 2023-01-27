@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": false,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "jsxImportSource": "solid-js",
+    "noEmitOnError": true,
+    "target": "esnext",
+    "module": "commonjs",
+    "types": ["vite/client", "node"],
+    "paths": {
+      "$/*": ["./packages/*"],
+      "$sandbox/*": ["./applications/sandbox/packages/*"]
+    }
+  },
+  "include": [
+    "src",
+    "./applications/web/src",
+    "./applications/sandbox/src",
+    "./applications/api/src",
+    "./packages",
+
+  ],
+  "exclude": ["node_modules"],
+}

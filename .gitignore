@@ -1,0 +1,24 @@
+*node_modules/*
+
+logs
+*.log
+*.logs
+
+coverage
+mocha-coverage
+
+# development specific data
+.env
+applications/web/src/index.html
+index.html
+applications/api/lowdb/*
+
+# artifacts
+.idea
+.eslintcache
+applications/web/build/*
+.nyc_output/*
+**/dist/*
+/test-results/
+/playwright-report/
+/playwright/.cache/

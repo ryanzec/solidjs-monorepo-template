@@ -1,0 +1,34 @@
+.notifications {
+  position: fixed;
+  bottom: var(--spacing-small2);
+  right: var(--spacing-small2);
+  display: flex;
+
+  /* this makes sure the newest one show at the top (simpler to do it is css vs javascript) */
+  flex-direction: column-reverse;
+  z-index: var(--z-index-global-notifications);
+}
+
+.notification {
+  padding: var(--spacing-small2);
+
+  /* @todo(variable) */
+  background-color: #8a8a8a;
+
+  &.is-removing {
+    :global {
+      /* since this animation is depending on javascript variables, we set the animation duration in the javascript */
+      animation-name: fade-out;
+      animation-timing-function: ease;
+    }
+  }
+
+
+  &:not(.is-removing) {
+    :global {
+      /* since this animation is depending on javascript variables, we set the animation duration in the javascript */
+      animation-name: fade-in;
+      animation-timing-function: ease;
+    }
+  }
+}
