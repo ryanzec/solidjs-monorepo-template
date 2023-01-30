@@ -3,7 +3,7 @@ import type { FelteAccessor } from '@felte/solid/dist/esm/create-accessor';
 
 import { createForm } from '@felte/solid';
 import { validator } from '@felte/validator-zod';
-import { For } from 'solid-js';
+import { createEffect, For } from 'solid-js';
 import * as zod from 'zod';
 
 import Button from '$/components/button/button';
@@ -12,7 +12,7 @@ import FormField from '$/components/form-field';
 import Input from '$/components/input/input';
 import Label from '$/components/label';
 import ValidationMessage from '$/components/validation-message';
-import { formUtils } from '$/stores/form-store';
+import { formStoreUtils } from '$/stores/form-store';
 import { zodUtils } from '$/utils/zod';
 
 export default {
@@ -64,11 +64,6 @@ interface UserFormFieldsProps {
 const UserFormFields = (props: UserFormFieldsProps) => {
   return (
     <>
-      <FormField>
-        <Label>First Name</Label>
-        <Input type="text" name="firstName" />
-        <ValidationMessage messages={props.errors().firstName} />
-      </FormField>
       <FormField>
         <Label>Last Name</Label>
         <Input type="text" name="lastName" />
@@ -141,12 +136,12 @@ const UserFormFields = (props: UserFormFieldsProps) => {
 };
 
 export const Default = () => {
-  const { form, data, addArrayField, removeArrayField, setValue } = formUtils.createForm<FormData>({
+  const { form, data, addArrayField, removeArrayField, setValue } = formStoreUtils.createForm<FormData>({
     schema: formDataSchema,
     initialValues: {
       firstName: 'first',
     },
-    onSubmit: (data: Partial<FormData>) => {
+    onSubmit: (values) => {
       console.log(data);
     },
   });
@@ -166,11 +161,20 @@ export const Default = () => {
     },
   });
 
+  createEffect(() => {
+    console.log(data());
+  });
+
   return (
     <div>
       <Button onclick={() => setValue('lastName', 'last')}>test simple value</Button>
       <Button onclick={() => setValue('checkbox', ['test2', 'test3'])}>test array value</Button>
       <form use:form>
+        <FormField>
+          <Label>First Name</Label>
+          <input type="text" name="firstName" />
+          <ValidationMessage messages={errors().firstName} />
+        </FormField>
         <UserFormFields
           errors={errors}
           arrayFields={data().arrayFields}

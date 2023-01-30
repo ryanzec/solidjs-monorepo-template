@@ -59,16 +59,16 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
     const name = target.name;
     const value = target.value;
     const checked = target.checked;
-    let newValue = get(data(), name);
+    let checkboxValue = get(data(), name);
 
-    if (!Array.isArray(newValue)) {
-      newValue = [];
+    if (!Array.isArray(checkboxValue)) {
+      checkboxValue = [];
     }
 
     if (checked) {
-      newValue.push(value);
+      checkboxValue.push(value);
     } else {
-      newValue = newValue.filter((currentValue: unknown) => currentValue !== value);
+      checkboxValue = checkboxValue.filter((currentValue: unknown) => currentValue !== value);
     }
 
     setData((oldValue) => {
@@ -276,6 +276,19 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
   };
 
   const form = (element: HTMLFormElement) => {
+    const inputElements = element.querySelectorAll('input');
+    const selectElements = element.querySelectorAll('select');
+
+    for (const inputElement of inputElements) {
+      assignFormInputEventHandlers(inputElement);
+      applyValueFromStore(inputElement);
+    }
+
+    for (const selectElement of selectElements) {
+      assignFormInputEventHandlers(selectElement);
+      applyValueFromStore(selectElement);
+    }
+
     setFormElement(element);
 
     element.addEventListener('submit', onSubmitForm);
@@ -336,6 +349,6 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
   return { form, data, addArrayField, removeArrayField, setValue };
 };
 
-export const formUtils = {
+export const formStoreUtils = {
   createForm,
 };
