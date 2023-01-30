@@ -12,6 +12,8 @@ import set from 'set-value';
 import { createSignal } from 'solid-js';
 import * as zod from 'zod';
 
+export type FormDirective = (element: HTMLFormElement) => void;
+
 const inputNodeNames = ['INPUT', 'SELECT', 'TEXTAREA'];
 
 enum InputType {
