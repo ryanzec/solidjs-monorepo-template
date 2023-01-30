@@ -23,6 +23,7 @@ interface FormData {
   lastName: string;
   email: string;
   password: string;
+  strings: string[];
 }
 
 const formDataSchema = zodUtils.schemaForType<FormData>()(
@@ -31,6 +32,7 @@ const formDataSchema = zodUtils.schemaForType<FormData>()(
     lastName: zod.string().min(1, 'Required'),
     email: zod.string().min(1, 'Required'),
     password: zod.string().min(1, 'Required'),
+    strings: zod.string().array().min(1, 'Required'),
   }),
 );
 
@@ -43,23 +45,34 @@ const UserFormFields = (props: UserFormFieldsProps) => {
     <>
       <FormField>
         <Label>First Name</Label>
-        <Input type="test" name="firstName" />
+        <Input type="text" name="firstName" />
         <ValidationMessage messages={props.errors().firstName} />
       </FormField>
       <FormField>
         <Label>Last Name</Label>
-        <Input type="test" name="lastName" />
+        <Input type="text" name="lastName" />
         <ValidationMessage messages={props.errors().lastName} />
       </FormField>
       <FormField>
-        <Label>Email</Label>
-        <Input type="test" name="email" />
+        <Label for="test">Email</Label>
+        <Input type="text" name="email" />
         <ValidationMessage messages={props.errors().email} />
       </FormField>
       <FormField>
         <Label>Password</Label>
-        <Input type="test" name="password" />
+        <Input type="text" name="password" />
         <ValidationMessage messages={props.errors().password} />
+      </FormField>
+      <FormField>
+        <Label>Strings</Label>
+        <Input type="checkbox" name="strings" value="test1" /> test1
+        <br />
+        <Input type="checkbox" name="strings" value="test2" /> test2
+        <br />
+        <Input type="checkbox" name="strings" value="test3" /> test3
+        <br />
+        <Input type="checkbox" name="strings" value="test4" /> test4
+        <ValidationMessage messages={props.errors().strings} />
       </FormField>
     </>
   );

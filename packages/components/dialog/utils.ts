@@ -50,8 +50,7 @@ const createDialogForm = <
   createMutation: CreateMutationResult<TCreateReturns, unknown, TCreateInput>,
   updateMutation: CreateMutationResult<TUpdateReturns, unknown, TUpdateInput>,
   deleteMutation: CreateMutationResult<TDeleteReturns, unknown, TEntityIdentifier>,
-  // disabling the using of any of using any in the recommended approach for making sure a zod schema match a
-  // typescript type
+  // seems like any is needed to support the zod schema type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   formDataSchema: zod.ZodType<TFormData, any, any>,
 ) => {

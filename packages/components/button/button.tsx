@@ -83,6 +83,7 @@ export const Button = (props: ParentProps<ButtonProps>) => {
       })}
       disabled={local.disabled || isLoading}
       data-id="button"
+      type="button"
       {...restOfProps}
     >
       {(local.preIcon || (isLoading && local.loadingIconPosition === ButtonIconPosition.PRE)) && (
