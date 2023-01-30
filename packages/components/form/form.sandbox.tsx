@@ -144,6 +144,9 @@ export const Default = () => {
     onSubmit: (values) => {
       console.log(data);
     },
+    onValueChanged: (name, value) => {
+      console.log(name, value);
+    },
   });
   const {
     // form,
@@ -159,10 +162,6 @@ export const Default = () => {
     onSubmit: async (values) => {
       console.log(values);
     },
-  });
-
-  createEffect(() => {
-    console.log(data());
   });
 
   return (

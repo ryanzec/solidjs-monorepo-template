@@ -27,6 +27,7 @@ enum InputType {
 
 interface CreateFormParams<TFormData extends object> {
   onSubmit?: (data: Partial<TFormData>) => void;
+  onValueChanged?: (name: keyof TFormData, value: unknown) => void;
   initialValues?: Partial<TFormData>;
   // seems like any is needed to support the zod schema type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,6 +54,21 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
       // see comment at top of file as to why explicit casting is happening
       return newValue as TFormData;
     });
+
+    // we don't trigger the only value change here as even though it is change, we don't want to trigger on each
+    // character
+  };
+
+  const onTextChange = (event: Event) => {
+    // see comment at top of file as to why explicit casting is happening
+    const target = event.target as HTMLInputElement;
+    const name = target.name;
+
+    // since the input event handler changing the data, this event is only need for trigger the on value change event
+    if (params.onValueChanged) {
+      // see comment at top of file as to why explicit casting is happening
+      params.onValueChanged(name as keyof TFormData, get(data(), name));
+    }
   };
 
   const onCheckboxChange = (event: Event) => {
@@ -76,10 +92,15 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
     setData((oldValue) => {
       const newValue = { ...oldValue };
 
-      set(newValue, name, newValue);
+      set(newValue, name, checkboxValue);
 
       return newValue;
     });
+
+    if (params.onValueChanged) {
+      // see comment at top of file as to why explicit casting is happening
+      params.onValueChanged(name as keyof TFormData, get(data(), name));
+    }
   };
 
   const onRadioChange = (event: Event) => {
@@ -96,6 +117,11 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
 
       return newValue;
     });
+
+    if (params.onValueChanged) {
+      // see comment at top of file as to why explicit casting is happening
+      params.onValueChanged(name as keyof TFormData, get(data(), name));
+    }
   };
 
   const onSelectChange = (event: Event) => {
@@ -111,6 +137,11 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
 
       return newValue;
     });
+
+    if (params.onValueChanged) {
+      // see comment at top of file as to why explicit casting is happening
+      params.onValueChanged(name as keyof TFormData, get(data(), name));
+    }
   };
 
   const onSubmitForm = (event: Event) => {
@@ -182,7 +213,7 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
       elementsProcessed++;
       currentElement = elementsToCheck.shift();
 
-      if (!currentElement) {
+      if (!currentElement || !currentElement.children) {
         continue;
       }
 
@@ -223,6 +254,7 @@ const createForm = <TFormData extends object>(params: CreateFormParams<TFormData
     }
 
     element.addEventListener('input', onInput);
+    element.addEventListener('change', onTextChange);
   };
 
   const applyValueFromStore = (element: Element) => {
