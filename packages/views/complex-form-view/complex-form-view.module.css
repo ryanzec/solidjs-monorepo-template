@@ -1,0 +1,13 @@
+.lists {
+  display: flex;
+}
+
+.list {
+  flex: 1 0 auto;
+}
+
+.item {
+  height: 30px;
+  border: 1px solid gray;
+  margin: 3px;
+}

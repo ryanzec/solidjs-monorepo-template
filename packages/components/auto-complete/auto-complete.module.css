@@ -1,0 +1,86 @@
+.auto-complete {
+  /* this make the items element width to be constrained by the main auto complete element */
+  position: relative;
+
+  .input {
+    width: calc(100% - 24px);
+  }
+}
+
+.input-container {
+  position: relative;
+  border: 1px solid var(--input-border-color);
+  border-radius: var(--border-radius-base);
+  background-color: white;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon-indicator {
+  //position: absolute;
+  //top: 0;
+  //right: 8px;
+  //display: flex;
+  //align-items: center;
+}
+
+.list {
+  display: none;
+  z-index: var(--z-index-auto-complete-list);
+}
+
+.loading-indicator {
+  display: flex;
+  align-items: center;
+
+  svg {
+    margin-right: 8px;
+
+    :global {
+      animation: spin 1s linear;
+      animation-iteration-count: infinite;
+    }
+  }
+}
+
+.opened-list {
+  display: block;
+  position: absolute;
+  background-color: white;
+  border: 1px solid black;
+  overflow-y: auto;
+  margin: 4px 0 0 0;
+  padding: 0;
+  width: 100%;
+  max-height: 150px;
+  border-radius: 5px;
+}
+
+.selectable-option {
+  list-style: none;
+  padding: 4px 0;
+  cursor: pointer;
+}
+
+.highlighted-option {
+  background-color: #bde4ff;
+}
+
+.selected-option {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 4px;
+  margin-right: 4px;
+  padding: 4px 8px;
+  background-color: white;
+  border-radius: 999px;
+  border: 1px solid black;
+}
+
+.remove-selected-option {
+  padding: 4px;
+  cursor: pointer;
+
+  /* prevent the item from shrinking */
+  flex: 0 0 auto;
+}
