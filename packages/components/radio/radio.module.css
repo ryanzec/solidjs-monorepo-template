@@ -1,0 +1,14 @@
+.radio {
+  display: inline-flex;
+  align-items: center;
+
+  input {
+    margin-right: var(--spacing-small3);
+  }
+}
+
+.group {
+  .radio {
+    display: flex;
+  }
+}

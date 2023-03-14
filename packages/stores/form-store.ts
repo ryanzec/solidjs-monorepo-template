@@ -13,6 +13,7 @@ import { Accessor, createSignal } from 'solid-js';
 import * as zod from 'zod';
 
 import { domUtils, InputType } from '$/utils/dom';
+import { zodUtils } from '$/utils/zod';
 
 export type FormDirective = (element: HTMLFormElement) => void;
 
@@ -37,7 +38,7 @@ export type FormSetValue<TFormData> = (name: keyof TFormData, value: unknown) =>
 export type FormData<TFormData> = Accessor<Partial<TFormData>>;
 
 interface CreateFormOptions<TFormData extends object> {
-  onSubmit?: (data: Partial<TFormData>) => void;
+  onSubmit: (data: Partial<TFormData>) => void;
   // since this is a generic system, not sure what else can be done besides using any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onValueChanged?: (name: keyof TFormData, value: any) => void;
@@ -47,22 +48,144 @@ interface CreateFormOptions<TFormData extends object> {
   // seems like any is needed to support the zod schema type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema?: zod.ZodType<TFormData, any, any>;
+  validateOnUpdate?: boolean;
 }
 
-const createForm = <TFormData extends object>(options: CreateFormOptions<TFormData> = {}) => {
+const defaultCreateFormOptions = {
+  validateOnUpdate: true,
+};
+
+const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<TFormData>) => {
+  const options = Object.assign({}, defaultCreateFormOptions, passedOptions);
   const [errors, setErrors] = createSignal<FormErrorsData<TFormData>>({});
   // see comment at top of file as to why explicit casting is happening
   const [data, setData] = createSignal<Partial<TFormData>>(options.initialValues ?? {});
+  const [touchedFields, setTouchedFields] = createSignal<Array<keyof TFormData>>([]);
   const [formElement, setFormElement] = createSignal<Element>();
+
+  // seems like any is needed to support the zod schema type
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [schema, setSchema] = createSignal<zod.ZodType<TFormData, any, any> | undefined>(options.schema);
+
+  const isTouched = (name: keyof TFormData) => {
+    return touchedFields().includes(name);
+  };
+
+  const setAsTouched = (name: keyof TFormData) => {
+    const newTouchedFields = [...touchedFields(), name];
+
+    setTouchedFields([...new Set(newTouchedFields)]);
+  };
+
+  const removeAsTouched = (name: keyof TFormData) => {
+    setTouchedFields(touchedFields().filter((fieldName) => fieldName !== name));
+  };
+
+  interface TriggerValueChangeOptions {
+    isTouched?: boolean;
+  }
 
   // forms are dynamic so allowing any value here
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const triggerValueChanged = (name: string, value: any) => {
-    if (!options.onValueChanged) {
-      return;
+  const triggerValueChanged = (name: string, value: any, selfOptions: TriggerValueChangeOptions = {}) => {
+    if (options.onValueChanged) {
+      options.onValueChanged(name as keyof TFormData, value);
     }
 
-    options.onValueChanged(name as keyof TFormData, value);
+    if (selfOptions.isTouched !== undefined) {
+      if (selfOptions.isTouched) {
+        setAsTouched(name as keyof TFormData);
+      } else {
+        removeAsTouched(name as keyof TFormData);
+      }
+    }
+
+    if (schema() && options.validateOnUpdate) {
+      updateValidationErrors(name);
+    }
+  };
+
+  const updateValidationErrors = (fieldName?: string) => {
+    const activeSchema = schema();
+
+    if (!activeSchema) {
+      setErrors({});
+
+      return false;
+    }
+
+    const validationResults = activeSchema.safeParse(data());
+
+    if (validationResults.success) {
+      setErrors({});
+
+      return false;
+    }
+
+    const getErrors = (formattedErrors: { _errors: string[] }, parentPrefix = '') => {
+      const errorKeys = Object.keys(formattedErrors);
+      const newErrors = {};
+
+      errorKeys.forEach((errorKey) => {
+        const existingErrors = get(errors(), `${parentPrefix}${errorKey}`);
+
+        // copy over existing errors so they don't get removed
+        if (existingErrors) {
+          // @ts-expect-error see comment at top of file
+          newErrors[errorKey] = existingErrors;
+        }
+
+        // this seems to always be part of the result of zod formatted validation but is not useful is our case
+        // as best I can tell
+        if (
+          errorKey === '_errors' ||
+          !isTouched(`${parentPrefix}${errorKey}` as keyof TFormData) ||
+          (fieldName && fieldName.indexOf(`${parentPrefix}${errorKey}`) !== 0)
+        ) {
+          return;
+        }
+
+        // @ts-expect-error see comment at top of file
+        const currentField = formattedErrors[errorKey];
+        const currentFieldKeys = Object.keys(currentField);
+        const currentFieldErrors: Record<string, Record<string, { errors: string[] }>> = {};
+
+        if (currentFieldKeys.length > 1) {
+          currentFieldKeys.forEach((currentFieldKey) => {
+            // this seems to always be part of the result of zod formatted validation but is not useful is our case
+            // as best  I can tell
+            if (currentFieldKey === '_errors') {
+              return;
+            }
+
+            currentFieldErrors[currentFieldKey] = getErrors(
+              currentField[currentFieldKey],
+              `${errorKey}.${currentFieldKey}.`,
+            );
+          });
+        }
+
+        if (currentField._errors?.length > 0) {
+          currentFieldErrors.errors = currentField._errors;
+        }
+
+        // @ts-expect-error see comment at top of file
+        newErrors[errorKey] = currentFieldErrors;
+      });
+
+      return newErrors;
+    };
+
+    const formattedErrors = validationResults.error.format();
+
+    // make sure any path that have errors are marked as touched so the errors are processed
+    setTouchedFields([
+      ...new Set([...touchedFields(), ...zodUtils.getErrorPaths<keyof TFormData>(validationResults.error)]),
+    ]);
+
+    setErrors(getErrors(formattedErrors));
+
+    return true;
   };
 
   const onInput = (event: Event) => {
@@ -80,8 +203,8 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
       return newValue as TFormData;
     });
 
-    // @todo(refactor) might want to make this configurable if doing this on every change becomes a problem in
-    // @todo(refactor) certain cases
+    // @todo(performance) might want to make this configurable if doing this on every change becomes a problem in
+    // @todo(performance) certain cases
     triggerValueChanged(name, get(data(), name));
   };
 
@@ -90,7 +213,11 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
     const target = event.target as HTMLInputElement;
     const name = target.name;
 
-    triggerValueChanged(name, get(data(), name));
+    // since this only happen when the input loses focus, this is where we want to make sure the input is marked
+    // as touched
+    triggerValueChanged(name, get(data(), name), {
+      isTouched: true,
+    });
   };
 
   const onCheckboxChange = (event: Event) => {
@@ -124,7 +251,7 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
       return newValue;
     });
 
-    triggerValueChanged(name, get(data(), name));
+    triggerValueChanged(name, get(data(), name), { isTouched: true });
   };
 
   const onRadioChange = (event: Event) => {
@@ -142,7 +269,7 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
       return newValue;
     });
 
-    triggerValueChanged(name, get(data(), name));
+    triggerValueChanged(name, get(data(), name), { isTouched: true });
   };
 
   const onSelectChange = (event: Event) => {
@@ -159,71 +286,17 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
       return newValue;
     });
 
-    triggerValueChanged(name, get(data(), name));
+    triggerValueChanged(name, get(data(), name), { isTouched: true });
   };
 
   const onSubmitForm = (event: Event) => {
     event.preventDefault();
     event.stopPropagation();
 
-    if (!options.onSubmit) {
-      return;
-    }
-
     const values = data();
 
-    if (options.schema) {
-      const validationResults = options.schema.safeParse(values);
-
-      if (!validationResults.success) {
-        const getErrors = (formattedErrors: { _errors: string[] }) => {
-          console.log(formattedErrors);
-          const errorKeys = Object.keys(formattedErrors);
-          const errors = {};
-
-          errorKeys.forEach((errorKey) => {
-            // this seems to always be part of the result of zod formatted validation but is not useful is our case
-            // as best  I can tell
-            if (errorKey === '_errors') {
-              return;
-            }
-
-            // @ts-expect-error see comment at top of file
-            const currentField = formattedErrors[errorKey];
-            const currentFieldKeys = Object.keys(currentField);
-            const currentFieldErrors: Record<string, Record<string, { errors: string[] }>> = {};
-
-            if (currentFieldKeys.length > 1) {
-              currentFieldKeys.forEach((currentFieldKey) => {
-                // this seems to always be part of the result of zod formatted validation but is not useful is our case
-                // as best  I can tell
-                if (currentFieldKey === '_errors') {
-                  return;
-                }
-
-                currentFieldErrors[currentFieldKey] = getErrors(currentField[currentFieldKey]);
-              });
-            }
-
-            if (currentField._errors?.length > 0) {
-              currentFieldErrors.errors = currentField._errors;
-            }
-
-            // @ts-expect-error see comment at top of file
-            errors[errorKey] = currentFieldErrors;
-          });
-
-          return errors;
-        };
-
-        const formattedErrors = validationResults.error.format();
-
-        setErrors(getErrors(formattedErrors));
-
-        return;
-      }
-
-      setErrors({});
+    if (updateValidationErrors()) {
+      return;
     }
 
     options.onSubmit(values);
@@ -345,7 +418,7 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
       return newValue;
     });
 
-    triggerValueChanged(name as string, get(data(), name as string));
+    triggerValueChanged(name as string, get(data(), name as string), { isTouched: true });
   };
 
   const removeArrayField = (name: keyof TFormData, removeIndex: number) => {
@@ -357,7 +430,7 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
       };
     });
 
-    triggerValueChanged(name as string, get(data(), name as string));
+    triggerValueChanged(name as string, get(data(), name as string), { isTouched: true });
   };
 
   const setValue: FormSetValue<TFormData> = (name: keyof TFormData, value: unknown) => {
@@ -369,7 +442,7 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
       return newValue;
     });
 
-    triggerValueChanged(name as string, value);
+    triggerValueChanged(name as string, value, { isTouched: true });
 
     // see comment at top of file as to why explicit casting is happening
     // we do all version to properly support checkboxes and radios that can have the same name
@@ -402,6 +475,7 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
     // reset the internal data
     setData(options.initialValues ?? {});
     setErrors({});
+    setTouchedFields([]);
 
     if (options.onReset) {
       options.onReset();
@@ -414,6 +488,7 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
     // clear the internal data
     setData({});
     setErrors({});
+    setTouchedFields([]);
 
     if (options.onClear) {
       options.onClear();
@@ -422,7 +497,19 @@ const createForm = <TFormData extends object>(options: CreateFormOptions<TFormDa
     resetHtmlElements();
   };
 
-  return { form, data, addArrayField, removeArrayField, setValue, errors, clear, reset };
+  return {
+    form,
+    data,
+    addArrayField,
+    removeArrayField,
+    setValue,
+    errors,
+    clear,
+    reset,
+    setSchema,
+    isTouched,
+    touchedFields,
+  };
 };
 
 export const formStoreUtils = {

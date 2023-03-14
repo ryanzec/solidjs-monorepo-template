@@ -16,13 +16,7 @@
   align-items: center;
 }
 
-.input-icon-indicator {
-  //position: absolute;
-  //top: 0;
-  //right: 8px;
-  //display: flex;
-  //align-items: center;
-}
+.input-icon-indicator { }
 
 .list {
   display: none;

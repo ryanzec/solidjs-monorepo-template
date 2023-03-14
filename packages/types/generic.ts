@@ -11,3 +11,7 @@ export enum Key {
   TAB = 'Tab',
   ENTER = 'Enter',
 }
+
+export type BaseCommonDataType = boolean | string | number | object;
+
+export type CommonDataType = BaseCommonDataType | BaseCommonDataType[];

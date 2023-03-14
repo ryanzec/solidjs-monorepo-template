@@ -2,8 +2,6 @@ import classnames from 'classnames';
 import { Accessor, For, mergeProps, Show, splitProps } from 'solid-js';
 import { Dynamic } from 'solid-js/web';
 
-import SelectableOption from '$/components/auto-complete/selectable-option';
-import SelectedOption from '$/components/auto-complete/selected-option';
 import {
   AsyncOptionsState,
   AutoCompleteExtraData,
@@ -22,7 +20,14 @@ import styles from './auto-complete.module.css';
 const AutoComplete = <TData extends AutoCompleteExtraData>(passedProps: AutoCompleteProps<TData>) => {
   const [props, restOfProps] = splitProps(
     mergeProps(
-      { placeholder: 'Select...', autoShowOptions: false, forceSelection: true, isMulti: false, asyncDelay: 350 },
+      {
+        placeholder: 'Select...',
+        autoShowOptions: false,
+        forceSelection: true,
+        isMulti: false,
+        asyncDelay: 350,
+        removeOnDuplicateSingleSelect: false,
+      },
       passedProps,
     ),
     [

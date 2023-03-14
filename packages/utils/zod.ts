@@ -11,6 +11,17 @@ const schemaForType =
     return arg;
   };
 
+const getErrorPaths = <TSchemaData>(zodError: zod.ZodError) => {
+  const keys: TSchemaData[] = [];
+
+  zodError.issues.forEach((issue) => {
+    keys.push(issue.path.join('.') as TSchemaData);
+  });
+
+  return [...new Set(keys)];
+};
+
 export const zodUtils = {
   schemaForType,
+  getErrorPaths,
 };

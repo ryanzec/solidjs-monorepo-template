@@ -13,7 +13,7 @@ interface ApplicationFrameExpandableItemProps {
 }
 
 const ApplicationFrameExpandableItem = (props: ApplicationFrameExpandableItemProps) => {
-  const [isExpanded, setIsExpanded] = createSignal<boolean>(false);
+  const [isExpanded, setIsExpanded] = createSignal<boolean>(true);
 
   return (
     <div class={styles.navigationGroup}>
