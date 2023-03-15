@@ -2,15 +2,16 @@ import classnames from 'classnames';
 import { JSX, ParentProps, splitProps } from 'solid-js';
 
 import styles from '$/components/input/input.module.css';
+import { CommonDataAttributes } from '$/types/generic';
 
-type InputContainerProps = JSX.HTMLAttributes<HTMLDivElement>;
+type InputContainerProps = JSX.HTMLAttributes<HTMLDivElement> & CommonDataAttributes;
 
-const InputContainer = (props: ParentProps<InputContainerProps>) => {
-  const [local, restOfProps] = splitProps(props, ['class', 'children']);
+const InputContainer = (passedProps: ParentProps<InputContainerProps>) => {
+  const [props, restOfProps] = splitProps(passedProps, ['class', 'children']);
 
   return (
-    <div data-id="input-container" class={classnames(local.class, styles.container)} {...restOfProps}>
-      {local.children}
+    <div data-id="input-container" class={classnames(props.class, styles.container)} {...restOfProps}>
+      {props.children}
     </div>
   );
 };

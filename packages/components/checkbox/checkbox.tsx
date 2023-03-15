@@ -2,8 +2,9 @@ import classnames from 'classnames';
 import { JSX, splitProps } from 'solid-js';
 
 import styles from '$/components/checkbox/checkbox.module.css';
+import { CommonDataAttributes } from '$/types/generic';
 
-interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+interface CheckboxProps extends JSX.InputHTMLAttributes<HTMLInputElement>, CommonDataAttributes {
   labelNode: JSX.Element;
 }
 

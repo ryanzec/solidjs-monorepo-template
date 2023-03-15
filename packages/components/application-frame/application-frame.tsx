@@ -6,14 +6,15 @@ import styles from '$/components/application-frame/application-frame.module.css'
 import Button from '$/components/button';
 import { ButtonContext } from '$/components/button/utils';
 import { applicationStore, LOCAL_STORAGE_AUTHENTICATION_TOKEN_KEY } from '$/stores/application-store';
+import { CommonDataAttributes } from '$/types/generic';
 import { applicationUtils, GlobalVariable } from '$/utils/application';
 import { httpUtils } from '$/utils/http';
 import { localStorageCacheUtils } from '$/utils/local-storage-cache';
 
 import ApplicationFrameNavigation from './application-frame-navigation';
 
-const ApplicationFrame = (props: ParentProps<JSX.HTMLAttributes<HTMLDivElement>>) => {
-  const [local, restOfProps] = splitProps(props, ['children']);
+const ApplicationFrame = (passedProps: ParentProps<JSX.HTMLAttributes<HTMLDivElement> & CommonDataAttributes>) => {
+  const [props, restOfProps] = splitProps(passedProps, ['children', 'class']);
   const navigate = useNavigate();
 
   const onToggleTheme = () => {
@@ -46,7 +47,7 @@ const ApplicationFrame = (props: ParentProps<JSX.HTMLAttributes<HTMLDivElement>>
   });
 
   return (
-    <div data-id="application-frame" class={classnames(styles.applicationFrame)} {...restOfProps}>
+    <div data-id="application-frame" class={classnames(styles.applicationFrame, props.class)} {...restOfProps}>
       {applicationStore.isAuthenticated() && <ApplicationFrameNavigation />}
       <div class={classnames(styles.subContainer)}>
         <Show when={applicationStore.isAuthenticated()}>
@@ -63,7 +64,7 @@ const ApplicationFrame = (props: ParentProps<JSX.HTMLAttributes<HTMLDivElement>>
           </div>
         </Show>
         <div class={classnames(styles.mainContent)}>
-          <Suspense fallback={'Loading...'}>{local.children}</Suspense>
+          <Suspense fallback={'Loading...'}>{props.children}</Suspense>
         </div>
       </div>
     </div>

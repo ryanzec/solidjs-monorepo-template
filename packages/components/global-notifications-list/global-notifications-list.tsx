@@ -10,14 +10,14 @@ export interface GlobalNotificationsListProps extends JSX.HTMLAttributes<HTMLDiv
   notifications?: GlobalNotification[];
 }
 
-const GlobalNotificationsList = (props: GlobalNotificationsListProps) => {
-  const [local, restOfProps] = splitProps(mergeProps({ notifications: [] }, props), ['notifications', 'class']);
+const GlobalNotificationsList = (passedProps: GlobalNotificationsListProps) => {
+  const [props, restOfProps] = splitProps(mergeProps({ notifications: [] }, passedProps), ['notifications', 'class']);
 
   return (
-    <Show when={local.notifications.length > 0}>
+    <Show when={props.notifications.length > 0}>
       <Portal>
-        <div class={classnames(local.class, styles.notifications)} {...restOfProps}>
-          <For each={local.notifications}>
+        <div class={classnames(props.class, styles.notifications)} {...restOfProps}>
+          <For each={props.notifications}>
             {(notification) => {
               return <GlobalNotificationsListItem notification={notification} />;
             }}

@@ -11,8 +11,9 @@ import {
   DEFAULT_BUTTON_SIZE,
   DEFAULT_BUTTON_VARIANT,
 } from '$/components/button/utils';
+import { CommonDataAttributes } from '$/types/generic';
 
-interface ButtonGroupProps extends JSX.HTMLAttributes<HTMLDivElement> {
+interface ButtonGroupProps extends JSX.HTMLAttributes<HTMLDivElement>, CommonDataAttributes {
   context?: ButtonContext;
   size?: ButtonSize;
   variant?: ButtonVariant;
@@ -20,8 +21,8 @@ interface ButtonGroupProps extends JSX.HTMLAttributes<HTMLDivElement> {
   isAttached?: boolean;
 }
 
-const ButtonGroup = (props: ParentProps<ButtonGroupProps>) => {
-  const [local, restOfProps] = splitProps(
+const ButtonGroup = (passedProps: ParentProps<ButtonGroupProps>) => {
+  const [props, restOfProps] = splitProps(
     mergeProps(
       {
         isAttached: false,
@@ -30,26 +31,26 @@ const ButtonGroup = (props: ParentProps<ButtonGroupProps>) => {
         context: DEFAULT_BUTTON_CONTEXT,
         disabled: false,
       },
-      props,
+      passedProps,
     ),
     ['children', 'isAttached', 'variant', 'size', 'context', 'disabled'],
   );
 
   return (
     <ButtonGroupProvider
-      isAttached={local.isAttached}
-      variant={local.variant}
-      context={local.context}
-      size={local.size}
-      disabled={local.disabled}
+      isAttached={props.isAttached}
+      variant={props.variant}
+      context={props.context}
+      size={props.size}
+      disabled={props.disabled}
     >
       <div
         data-id="button-group"
         role="group"
-        class={classnames(styles.group, { [styles.isAttached]: local.isAttached })}
+        class={classnames(styles.group, { [styles.isAttached]: props.isAttached })}
         {...restOfProps}
       >
-        {local.children}
+        {props.children}
       </div>
     </ButtonGroupProvider>
   );

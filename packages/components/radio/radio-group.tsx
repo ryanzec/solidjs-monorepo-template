@@ -2,8 +2,9 @@ import classnames from 'classnames';
 import { JSX, ParentProps, splitProps } from 'solid-js';
 
 import styles from '$/components/radio/radio.module.css';
+import { CommonDataAttributes } from '$/types/generic';
 
-type RadioGroupProps = JSX.HTMLAttributes<HTMLDivElement>;
+type RadioGroupProps = JSX.HTMLAttributes<HTMLDivElement> & CommonDataAttributes;
 
 // we exposed a plain input in the off chance we need an input not hooked up to react-hook-form directly (like the
 // auto complete component)

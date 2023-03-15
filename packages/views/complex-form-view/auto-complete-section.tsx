@@ -22,8 +22,8 @@ const getOptionsAsync = async (inputValue?: string) => {
 };
 
 const AutoCompleteSection = () => {
-  const test1AutoComplete = autoCompleteUtils.createAutoComplete();
-  const test2AutoComplete = autoCompleteUtils.createAutoComplete({
+  const test1AutoComplete = autoCompleteUtils.createAutoCompleteValue();
+  const test2AutoComplete = autoCompleteUtils.createAutoCompleteValue({
     defaultValue: [
       {
         display: 'Option 1',
@@ -31,7 +31,7 @@ const AutoCompleteSection = () => {
       },
     ],
   });
-  const test3AutoComplete = autoCompleteUtils.createAutoComplete();
+  const test3AutoComplete = autoCompleteUtils.createAutoCompleteValue();
 
   return (
     <>
@@ -56,6 +56,9 @@ const AutoCompleteSection = () => {
         autoShowOptions
         filterOptions={autoCompleteUtils.simpleFilter}
         isMulti
+        name="test1"
+        selectableComponent={AutoComplete.SelectableOption}
+        selectedComponent={AutoComplete.SelectedOption}
       />
       <Show when={test1AutoComplete.selected()}>
         selected value: {JSON.stringify(test1AutoComplete.selected(), null, 2)}
@@ -79,6 +82,9 @@ const AutoCompleteSection = () => {
             value: 3,
           },
         ]}
+        name="test2"
+        selectableComponent={AutoComplete.SelectableOption}
+        selectedComponent={AutoComplete.SelectedOption}
       />
       <Show when={test2AutoComplete.selected()}>
         selected value: {JSON.stringify(test2AutoComplete.selected(), null, 2)}
@@ -103,6 +109,9 @@ const AutoCompleteSection = () => {
           },
         ]}
         getOptionsAsync={getOptionsAsync}
+        name="test3"
+        selectableComponent={AutoComplete.SelectableOption}
+        selectedComponent={AutoComplete.SelectedOption}
       />
       <Show when={test3AutoComplete.selected()}>
         selected value: {JSON.stringify(test3AutoComplete.selected(), null, 2)}

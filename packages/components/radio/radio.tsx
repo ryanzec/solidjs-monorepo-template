@@ -2,8 +2,9 @@ import classnames from 'classnames';
 import { JSX, splitProps } from 'solid-js';
 
 import styles from '$/components/radio/radio.module.css';
+import { CommonDataAttributes } from '$/types/generic';
 
-interface RadioProps extends JSX.InputHTMLAttributes<HTMLInputElement> {
+interface RadioProps extends JSX.InputHTMLAttributes<HTMLInputElement>, CommonDataAttributes {
   labelNode: JSX.Element;
 }
 

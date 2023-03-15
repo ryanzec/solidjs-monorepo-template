@@ -13,21 +13,21 @@ export interface GlobalNotificationsListItemProps extends JSX.HTMLAttributes<HTM
   notification: GlobalNotification;
 }
 
-const GlobalNotificationsListItem = (props: GlobalNotificationsListItemProps) => {
-  const [local, restOfProps] = splitProps(props, ['notification', 'class']);
+const GlobalNotificationsListItem = (passedProps: GlobalNotificationsListItemProps) => {
+  const [props, restOfProps] = splitProps(passedProps, ['notification', 'class']);
 
   return (
     <div
-      class={classnames(styles.notification, local.class, {
-        [styles.isRemoving]: local.notification.isRemoving || false,
+      class={classnames(styles.notification, props.class, {
+        [styles.isRemoving]: props.notification.isRemoving || false,
       })}
       style={{ 'animation-duration': `${REMOVE_ANIMATION_DURATION}ms` }}
       {...restOfProps}
     >
-      {local.notification.message}{' '}
+      {props.notification.message}{' '}
       <Button
         onclick={() => {
-          globalNotificationsStore.removeNotification(local.notification.id);
+          globalNotificationsStore.removeNotification(props.notification.id);
         }}
       >
         X

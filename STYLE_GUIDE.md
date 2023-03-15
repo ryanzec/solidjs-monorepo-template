@@ -634,7 +634,19 @@ expect(subject.next.getCall(0).args).to.deep.equal([
 
 # SolidJS
 
-TBD
+## split / merge props to `props`
+
+In order to keep things consistent, whenever you split or merge props, the result of the props to be used in that component should be `props`. You can name the props being passed into the component as `passedProps`.
+
+```ts
+const Component = (passedProps: ComponentProps) => {
+    const props = mergeProps({position: DEFAULT_BUTTON_ICON_POSITION, isLoading: false}, passedProps);
+    // or
+    const [props, restOfProps] = splitProps(passedProps, ['droppableId', 'items', 'children']);
+    
+    // ....
+}
+```
 
 # Styling / CSS coding guide
 

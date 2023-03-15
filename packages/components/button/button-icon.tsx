@@ -11,27 +11,26 @@ export interface ButtonIconProps extends JSX.HTMLAttributes<HTMLDivElement> {
   icon: JSX.Element;
 }
 
-const ButtonIcon = (props: ButtonIconProps) => {
-  const [local, restOfProps] = splitProps(
-    mergeProps({ position: DEFAULT_BUTTON_ICON_POSITION, isLoading: false }, props),
-    ['position', 'isLoading', 'icon'],
+const ButtonIcon = (passedProps: ButtonIconProps) => {
+  const [props, restOfProps] = splitProps(
+    mergeProps({ position: DEFAULT_BUTTON_ICON_POSITION, isLoading: false }, passedProps),
+    ['position', 'isLoading', 'icon', 'class'],
   );
-  let dataId = 'icon';
-
-  dataId += local.isLoading ? ' loading' : '';
-  dataId += local.position === ButtonIconPosition.PRE ? ' pre' : ' post';
+  const dataId = () => {
+    return `icon${props.isLoading ? ' loading' : ''}${props.position === ButtonIconPosition.PRE ? ' pre' : ' post'}`;
+  };
 
   return (
     <div
-      data-id={dataId}
-      class={classnames(styles.icon, {
-        [styles.iconPre]: local.position === ButtonIconPosition.PRE,
-        [styles.iconPost]: local.position === ButtonIconPosition.POST,
-        [styles.iconIsLoading]: local.isLoading,
+      data-id={dataId()}
+      class={classnames(styles.icon, props.class, {
+        [styles.iconPre]: props.position === ButtonIconPosition.PRE,
+        [styles.iconPost]: props.position === ButtonIconPosition.POST,
+        [styles.iconIsLoading]: props.isLoading,
       })}
       {...restOfProps}
     >
-      {local.isLoading ? <Icon.HeroHome /> : local.icon}
+      {props.isLoading ? <Icon.HeroHome /> : props.icon}
     </div>
   );
 };

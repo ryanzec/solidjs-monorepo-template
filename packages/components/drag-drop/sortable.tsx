@@ -7,13 +7,13 @@ interface SortableProps extends JSX.HTMLAttributes<HTMLDivElement> {
   item: DragDropItem;
 }
 
-const Sortable = (props: ParentProps<SortableProps>) => {
-  const [local, restOfProps] = splitProps(props, ['item', 'children']);
-  const sortable = createSortable(local.item.id);
+const Sortable = (passedProps: ParentProps<SortableProps>) => {
+  const [props, restOfProps] = splitProps(passedProps, ['item', 'children']);
+  const sortable = createSortable(props.item.id);
 
   return (
     <div use:sortable {...restOfProps} style={{ opacity: sortable.isActiveDraggable ? 0.25 : 1 }}>
-      {local.children}
+      {props.children}
     </div>
   );
 };

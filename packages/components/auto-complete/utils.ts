@@ -2,7 +2,7 @@ import { debounce } from '@solid-primitives/scheduled';
 import { Accessor, createEffect, createSignal, JSX, onCleanup } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
 
-import { Key } from '$/types/generic';
+import { CommonDataAttributes, Key } from '$/types/generic';
 
 export type AutoCompleteOptionValue = string | number;
 
@@ -54,7 +54,9 @@ export interface AutoCompleteSelectedOptionProps<TData extends AutoCompleteExtra
   removeValue: (optionIndex: number) => void;
 }
 
-export interface AutoCompleteProps<TData extends AutoCompleteExtraData> extends JSX.HTMLAttributes<HTMLDivElement> {
+export interface AutoCompleteProps<TData extends AutoCompleteExtraData>
+  extends JSX.HTMLAttributes<HTMLDivElement>,
+    CommonDataAttributes {
   selected: AutoCompleteOption<TData>[];
   setSelected: (option: AutoCompleteOption<TData>[]) => void;
   placeholder?: string;

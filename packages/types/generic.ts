@@ -15,3 +15,7 @@ export enum Key {
 export type BaseCommonDataType = boolean | string | number | object;
 
 export type CommonDataType = BaseCommonDataType | BaseCommonDataType[];
+
+export interface CommonDataAttributes {
+  'data-id'?: string;
+}

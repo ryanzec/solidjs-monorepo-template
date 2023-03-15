@@ -48,11 +48,11 @@ interface CreateFormOptions<TFormData extends object> {
   // seems like any is needed to support the zod schema type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   schema?: zod.ZodType<TFormData, any, any>;
-  validateOnUpdate?: boolean;
+  validateOnChange?: boolean;
 }
 
 const defaultCreateFormOptions = {
-  validateOnUpdate: true,
+  validateOnChange: true,
 };
 
 const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<TFormData>) => {
@@ -92,6 +92,8 @@ const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<T
       options.onValueChanged(name as keyof TFormData, value);
     }
 
+    console.log(selfOptions);
+
     if (selfOptions.isTouched !== undefined) {
       if (selfOptions.isTouched) {
         setAsTouched(name as keyof TFormData);
@@ -100,7 +102,7 @@ const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<T
       }
     }
 
-    if (schema() && options.validateOnUpdate) {
+    if (schema() && options.validateOnChange) {
       updateValidationErrors(name);
     }
   };
@@ -177,11 +179,10 @@ const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<T
     };
 
     const formattedErrors = validationResults.error.format();
+    const newTouchedFields = fieldName ? [] : zodUtils.getErrorPaths<keyof TFormData>(validationResults.error);
 
     // make sure any path that have errors are marked as touched so the errors are processed
-    setTouchedFields([
-      ...new Set([...touchedFields(), ...zodUtils.getErrorPaths<keyof TFormData>(validationResults.error)]),
-    ]);
+    setTouchedFields([...new Set([...touchedFields(), ...newTouchedFields])]);
 
     setErrors(getErrors(formattedErrors));
 
@@ -206,6 +207,16 @@ const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<T
     // @todo(performance) might want to make this configurable if doing this on every change becomes a problem in
     // @todo(performance) certain cases
     triggerValueChanged(name, get(data(), name));
+  };
+
+  const onBlur = (event: Event) => {
+    // see comment at top of file as to why explicit casting is happening
+    const target = event.target as HTMLInputElement;
+    const name = target.name;
+
+    // while the value did not change, run this make sure things like validation are executed so we run it with
+    // whatever the current value is
+    triggerValueChanged(name, get(data(), name), { isTouched: true });
   };
 
   const onTextChange = (event: Event) => {
@@ -325,6 +336,7 @@ const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<T
 
     element.addEventListener('input', onInput);
     element.addEventListener('change', onTextChange);
+    element.addEventListener('blur', onBlur);
   };
 
   const applyValueFromStore = (element: Element) => {
@@ -418,7 +430,7 @@ const createForm = <TFormData extends object>(passedOptions: CreateFormOptions<T
       return newValue;
     });
 
-    triggerValueChanged(name as string, get(data(), name as string), { isTouched: true });
+    triggerValueChanged(name as string, get(data(), name as string));
   };
 
   const removeArrayField = (name: keyof TFormData, removeIndex: number) => {

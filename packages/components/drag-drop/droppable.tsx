@@ -10,16 +10,16 @@ interface DroppableProps extends JSX.HTMLAttributes<HTMLDivElement> {
   items: DragDropItem[];
 }
 
-const Droppable = (props: ParentProps<DroppableProps>) => {
-  const [local, restOfProps] = splitProps(props, ['droppableId', 'items', 'children']);
+const Droppable = (passedProps: ParentProps<DroppableProps>) => {
+  const [props, restOfProps] = splitProps(passedProps, ['droppableId', 'items', 'children']);
 
   // droppable is technically being used by SolidJS's directive feature
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const droppable = createDroppable(local.droppableId);
+  const droppable = createDroppable(props.droppableId);
 
   return (
     <div use:droppable {...restOfProps}>
-      <SortableProvider ids={local.items.map((item) => item.id)}>{local.children}</SortableProvider>
+      <SortableProvider ids={props.items.map((item) => item.id)}>{props.children}</SortableProvider>
     </div>
   );
 };

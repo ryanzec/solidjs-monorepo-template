@@ -1,5 +1,6 @@
-import { Accessor, createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
+import { createEffect, createSignal, For, Match, Show, Switch } from 'solid-js';
 import * as zod from 'zod';
+import { ZodType } from 'zod';
 
 import AutoComplete, { AutoCompleteOption, autoCompleteUtils } from '$/components/auto-complete';
 import { AutoCompleteValueStore } from '$/components/auto-complete/utils';
@@ -12,7 +13,7 @@ import Label from '$/components/label';
 import Radio from '$/components/radio';
 import Textarea from '$/components/textarea';
 import ValidationMessage from '$/components/validation-message';
-import { FormErrorsData, formStoreUtils } from '$/stores/form-store';
+import { formStoreUtils } from '$/stores/form-store';
 import { CommonDataType } from '$/types/generic';
 import { zodUtils } from '$/utils/zod';
 import ExpandableCode from '$sandbox/components/expandable-code';
@@ -28,7 +29,14 @@ interface NestStructure {
 
 interface SimpleFormData {
   title: string;
+  title2?: string;
 }
+
+const simpleFormDataSchema = zodUtils.schemaForType<SimpleFormData>()(
+  zod.object({
+    title: zod.string().min(1, 'Required'),
+  }),
+);
 
 export const SetValue = () => {
   const { form, setValue } = formStoreUtils.createForm<SimpleFormData>({
@@ -36,18 +44,51 @@ export const SetValue = () => {
   });
 
   return (
-    <div>
+    <div data-id="container">
       <form use:form>
         <FormField>
           <Label>Title</Label>
-          <input type="text" name="title" />
+          <Input type="text" name="title" />
         </FormField>
         <Button.Group>
           <Button data-id="submit-button" type="submit">
             Submit
           </Button>
-          <Button data-id="set-value-button" onClick={() => setValue('title', 'last')}>
+          <Button data-id="set-value-button" onClick={() => setValue('title', 'test')}>
             Set Value
+          </Button>
+        </Button.Group>
+      </form>
+    </div>
+  );
+};
+
+export const InitializeWithValues = () => {
+  const { form, clear } = formStoreUtils.createForm<SimpleFormData>({
+    onSubmit: () => {},
+    initialValues: {
+      title: 'test',
+      title2: 'test2',
+    },
+  });
+
+  return (
+    <div data-id="container">
+      <form use:form>
+        <FormField>
+          <Label>Title</Label>
+          <Input type="text" name="title" />
+        </FormField>
+        <FormField>
+          <Label>Title2</Label>
+          <Input type="text" name="title2" />
+        </FormField>
+        <Button.Group>
+          <Button data-id="submit-button" type="submit">
+            Submit
+          </Button>
+          <Button data-id="clear-button" onClick={() => clear()}>
+            Clear
           </Button>
         </Button.Group>
       </form>
@@ -60,15 +101,20 @@ export const Clear = () => {
     onSubmit: () => {},
     initialValues: {
       title: 'test',
+      title2: 'test2',
     },
   });
 
   return (
-    <div>
+    <div data-id="container">
       <form use:form>
         <FormField>
           <Label>Title</Label>
-          <input type="text" name="title" />
+          <Input type="text" name="title" />
+        </FormField>
+        <FormField>
+          <Label>Title2</Label>
+          <Input type="text" name="title2" />
         </FormField>
         <Button.Group>
           <Button data-id="submit-button" type="submit">
@@ -89,17 +135,21 @@ export const ResetWithoutInitial = () => {
   });
 
   return (
-    <div>
+    <div data-id="container">
       <form use:form>
         <FormField>
           <Label>Title</Label>
-          <input type="text" name="title" />
+          <Input type="text" name="title" />
+        </FormField>
+        <FormField>
+          <Label>Title2</Label>
+          <Input type="text" name="title2" />
         </FormField>
         <Button.Group>
           <Button data-id="submit-button" type="submit">
             Submit
           </Button>
-          <Button data-id="clear-button" onClick={() => reset()}>
+          <Button data-id="reset-button" onClick={() => reset()}>
             Reset
           </Button>
         </Button.Group>
@@ -109,26 +159,34 @@ export const ResetWithoutInitial = () => {
 };
 
 export const ResetWithInitial = () => {
-  const { form, reset } = formStoreUtils.createForm<SimpleFormData>({
+  const { form, reset, clear } = formStoreUtils.createForm<SimpleFormData>({
     onSubmit: () => {},
     initialValues: {
       title: 'test',
+      title2: 'test2',
     },
   });
 
   return (
-    <div>
+    <div data-id="container">
       <form use:form>
         <FormField>
           <Label>Title</Label>
-          <input type="text" name="title" />
+          <Input type="text" name="title" />
+        </FormField>
+        <FormField>
+          <Label>Title2</Label>
+          <Input type="text" name="title2" />
         </FormField>
         <Button.Group>
           <Button data-id="submit-button" type="submit">
             Submit
           </Button>
-          <Button data-id="clear-button" onClick={() => reset()}>
+          <Button data-id="reset-button" onClick={() => reset()}>
             Reset
+          </Button>
+          <Button data-id="clear-button" onClick={() => clear()}>
+            Clear
           </Button>
         </Button.Group>
       </form>
@@ -137,7 +195,7 @@ export const ResetWithInitial = () => {
 };
 
 export const IsTouched = () => {
-  const { form, reset, isTouched } = formStoreUtils.createForm<SimpleFormData>({
+  const { form, reset, clear, isTouched } = formStoreUtils.createForm<SimpleFormData>({
     onSubmit: () => {},
     initialValues: {
       title: 'test',
@@ -145,17 +203,20 @@ export const IsTouched = () => {
   });
 
   return (
-    <div>
+    <div data-id="container">
       <form use:form>
         <FormField>
           <Label>Title</Label>
-          <input type="text" name="title" />
+          <Input type="text" name="title" />
         </FormField>
         <Button.Group>
           <Button data-id="submit-button" type="submit">
             Submit
           </Button>
-          <Button data-id="clear-button" onClick={() => reset()}>
+          <Button data-id="clear-button" onClick={() => clear()}>
+            Clear
+          </Button>
+          <Button data-id="reset-button" onClick={() => reset()}>
             Reset
           </Button>
         </Button.Group>
@@ -163,6 +224,127 @@ export const IsTouched = () => {
       <Show when={isTouched('title')}>
         <div data-id="is-touched-indicator">title was touched</div>
       </Show>
+    </div>
+  );
+};
+
+export const Events = () => {
+  const [submitTriggered, setSubmitTriggered] = createSignal(false);
+  const [clearEventTriggered, setClearEventTriggered] = createSignal(false);
+  const [resetEventTriggered, setResetEventTriggered] = createSignal(false);
+  const [valueChangedEventTriggered, setValueChangedEventTriggered] = createSignal(false);
+  const { form, reset, clear, errors } = formStoreUtils.createForm<SimpleFormData>({
+    schema: simpleFormDataSchema,
+    onSubmit: () => {
+      setSubmitTriggered(true);
+    },
+    initialValues: {
+      title: 'test',
+    },
+    onReset: () => {
+      setResetEventTriggered(true);
+    },
+    onClear: () => {
+      setClearEventTriggered(true);
+    },
+    onValueChanged: () => {
+      setValueChangedEventTriggered(true);
+    },
+  });
+
+  return (
+    <div data-id="container">
+      <form use:form>
+        <FormField>
+          <Label>Title</Label>
+          <Input type="text" name="title" />
+          <ValidationMessage messages={errors().title?.errors} />
+        </FormField>
+        <Button.Group>
+          <Button data-id="submit-button" type="submit">
+            Submit
+          </Button>
+          <Button data-id="reset-button" onClick={() => reset()}>
+            Reset
+          </Button>
+          <Button data-id="clear-button" onClick={() => clear()}>
+            Clear
+          </Button>
+        </Button.Group>
+      </form>
+      <Show when={valueChangedEventTriggered()}>
+        <div data-id="value-changed-event-triggered-indicator">value changed event triggered</div>
+      </Show>
+      <Show when={clearEventTriggered()}>
+        <div data-id="clear-event-triggered-indicator">clear event triggered</div>
+      </Show>
+      <Show when={resetEventTriggered()}>
+        <div data-id="reset-event-triggered-indicator">reset event triggered</div>
+      </Show>
+      <Show when={submitTriggered()}>
+        <div data-id="submit-event-triggered-indicator">submit event triggered</div>
+      </Show>
+    </div>
+  );
+};
+
+export const ValidateOnChange = () => {
+  const { form, reset, clear, errors } = formStoreUtils.createForm<SimpleFormData>({
+    schema: simpleFormDataSchema,
+    onSubmit: () => {},
+  });
+
+  return (
+    <div data-id="container">
+      <form use:form>
+        <FormField>
+          <Label>Title</Label>
+          <Input type="text" name="title" />
+          <ValidationMessage messages={errors().title?.errors} />
+        </FormField>
+        <Button.Group>
+          <Button data-id="submit-button" type="submit">
+            Submit
+          </Button>
+          <Button data-id="reset-button" onClick={() => reset()}>
+            Reset
+          </Button>
+          <Button data-id="clear-button" onClick={() => clear()}>
+            Clear
+          </Button>
+        </Button.Group>
+      </form>
+    </div>
+  );
+};
+
+export const NoValidateOnChange = () => {
+  const { form, reset, clear, errors } = formStoreUtils.createForm<SimpleFormData>({
+    schema: simpleFormDataSchema,
+    validateOnChange: false,
+    onSubmit: () => {},
+  });
+
+  return (
+    <div data-id="container">
+      <form use:form>
+        <FormField>
+          <Label>Title</Label>
+          <Input type="text" name="title" />
+          <ValidationMessage messages={errors().title?.errors} />
+        </FormField>
+        <Button.Group>
+          <Button data-id="submit-button" type="submit">
+            Submit
+          </Button>
+          <Button data-id="reset-button" onClick={() => reset()}>
+            Reset
+          </Button>
+          <Button data-id="clear-button" onClick={() => clear()}>
+            Clear
+          </Button>
+        </Button.Group>
+      </form>
     </div>
   );
 };
@@ -191,14 +373,14 @@ export const ArrayFields = () => {
     });
 
   return (
-    <div>
+    <div data-id="container">
       <form use:form>
         <For each={data().array}>
           {(arrayField, index) => {
             const getArrayFieldError = () => errors().array?.[index()] ?? {};
 
             return (
-              <>
+              <div data-id="array-field-element">
                 <FormField>
                   <Label>Part A</Label>
                   <Input type="text" name={`array.${index()}.partA`} />
@@ -209,15 +391,19 @@ export const ArrayFields = () => {
                   <Input type="text" name={`array.${index()}.partB`} />
                   <ValidationMessage messages={getArrayFieldError().partB?.errors} />
                 </FormField>
-                <Button context={ButtonContext.DANGER} onclick={() => removeArrayField('array', index())}>
+                <Button
+                  data-id="remove-array-field-button"
+                  context={ButtonContext.DANGER}
+                  onclick={() => removeArrayField('array', index())}
+                >
                   REMOVE
                 </Button>
-              </>
+              </div>
             );
           }}
         </For>
         <ValidationMessage messages={errors().array?.errors} />
-        <Button type="button" onclick={() => addArrayField('array')}>
+        <Button data-id="add-array-field-button" type="button" onclick={() => addArrayField('array')}>
           + Add Array Field
         </Button>
         <Button.Group>
@@ -306,7 +492,7 @@ const possibleRandomFields: RandomFormField[] = [
 ];
 
 export const DynamicFormElements = () => {
-  const { form, data, setValue, errors, setSchema, addArrayField, removeArrayField } =
+  const { form, data, setValue, errors, setSchema, addArrayField, removeArrayField, touchedFields } =
     formStoreUtils.createForm<DynamicFormData>({
       schema: dynamicFormDataSchema,
       onSubmit: (values) => {
@@ -336,7 +522,7 @@ export const DynamicFormElements = () => {
   };
 
   createEffect(() => {
-    const customZodElements: Record<string, any> = {};
+    const customZodElements: Record<string, ZodType> = {};
 
     randomInputs().forEach((input) => {
       customZodElements[input.name] = input.validation;
@@ -353,10 +539,14 @@ export const DynamicFormElements = () => {
   });
 
   return (
-    <div>
+    <div data-id="container">
       <For each={possibleRandomFields}>
         {(randomField) => {
-          return <Button onClick={() => addRandomField(randomField)}>Add {randomField.name} Field</Button>;
+          return (
+            <Button data-id={`add-${randomField.type}-field`} onClick={() => addRandomField(randomField)}>
+              Add {randomField.name} Field
+            </Button>
+          );
         }}
       </For>
       <form use:form>
@@ -400,7 +590,7 @@ export const DynamicFormElements = () => {
                           const getArrayFieldErrors = () => errors()[input.name]?.[index()] ?? {};
 
                           return (
-                            <>
+                            <div data-id="array-field-element">
                               <FormField>
                                 <Label>Part A</Label>
                                 <Input type="text" name={`${input.name}.${index()}.partA`} />
@@ -412,16 +602,17 @@ export const DynamicFormElements = () => {
                                 <ValidationMessage messages={getArrayFieldErrors().partB?.errors} />
                               </FormField>
                               <Button
+                                data-id="remove-array-field-button"
                                 context={ButtonContext.DANGER}
                                 onclick={() => removeArrayField(input.name, index())}
                               >
                                 REMOVE
                               </Button>
-                            </>
+                            </div>
                           );
                         }}
                       </For>
-                      <Button type="button" onclick={() => addArrayField(input.name)}>
+                      <Button data-id="add-array-field-button" type="button" onclick={() => addArrayField(input.name)}>
                         + Add Array Field
                       </Button>
                     </Match>
@@ -462,6 +653,7 @@ export const DynamicFormElements = () => {
       <hr />
       <h1>Debug Tools</h1>
       <ExpandableCode label="Errors">{JSON.stringify(errors(), null, 2)}</ExpandableCode>
+      <ExpandableCode label="Touched Fields">{JSON.stringify(touchedFields(), null, 2)}</ExpandableCode>
     </div>
   );
 };
